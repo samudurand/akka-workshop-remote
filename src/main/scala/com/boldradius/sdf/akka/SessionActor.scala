@@ -12,8 +12,10 @@ class SessionActor(target: ActorRef) extends Actor with ActorLogging {
   // Upon actor creation, build a new session
   val session = new Session
 
+  val sessionDuration = session.duration
+  log.info("session duration : " + sessionDuration)
   // This actor should only live for a certain duration, then shut itself down
-  context.system.scheduler.scheduleOnce(session.duration, self, PoisonPill)
+  context.system.scheduler.scheduleOnce(sessionDuration, self, PoisonPill)
 
   // Start the simulation
   self ! Click
