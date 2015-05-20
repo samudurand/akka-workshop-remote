@@ -3,6 +3,7 @@ package com.boldradius.sdf.akka
 import akka.actor.{Props, Actor, ActorLogging}
 import com.boldradius.sdf.akka.StatsActor.StatsDump
 import com.boldradius.sdf.akka.Supervisor.StatsTerminatedException
+import com.boldradius.sdf.akka.UserTrackerActor.Visit
 import org.joda.time.DateTime
 
 import scala.collection.mutable
@@ -63,6 +64,6 @@ object StatsFunctions {
 object StatsActor {
   def props: Props = Props(new StatsActor)
 
-  case class StatsDump(requests: List[Request])
+  case class StatsDump(requests: List[Visit])
 
 }

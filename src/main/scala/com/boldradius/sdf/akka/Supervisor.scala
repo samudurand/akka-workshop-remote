@@ -8,7 +8,7 @@ import com.boldradius.sdf.akka.Supervisor.{StopProducing, StartProducing, StatsT
 class Supervisor extends Actor with ActorLogging {
 
   val producer = context.actorOf(RequestProducer.props(10), "producerActor")
-  val statsActor = context.actorOf(StatsActor.props)
+  val statsActor = createStatsActor()
   val consumer = context.actorOf(Receiver.props(statsActor), "dummyConsumer")
 
   def receive: Receive = {
@@ -25,7 +25,12 @@ class Supervisor extends Actor with ActorLogging {
     val decider: SupervisorStrategy.Decider = {
       case StatsTerminatedException => Restart
     }
-    OneForOneStrategy(maxNrOfRetries = 2)(decider orElse super.supervisorStrategy.decider)
+    OneForOneStrategy(maxNrOfRetries = 1)(decider orElse super.supervisorStrategy.decider)
+  }
+
+  //Deferred to a method for supervising strategy testing
+  private[akka] def createStatsActor() = {
+    context.actorOf(StatsActor.props)
   }
 
 }
