@@ -19,7 +19,8 @@ class Receiver(statsActor: ActorRef) extends Actor with ActorLogging {
 
   def getFromSessionOrCreate(sessionId: Long): ActorRef = {
     actorsBySession.get(sessionId) match {
-      case Some(actor) => actor
+      case Some(actor) =>
+        actor
       case None =>
         createTracker(sessionId)
     }

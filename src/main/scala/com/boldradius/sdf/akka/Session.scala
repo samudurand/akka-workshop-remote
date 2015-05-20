@@ -45,8 +45,10 @@ object Session {
     } yield value
   }
 
-  val longVisit  = 5 minutes
-  val shortVisit = 10 seconds
+  //original 5 minutes
+  val longVisit  = 5 seconds
+  //original 10 seconds
+  val shortVisit = 1 seconds
 
   // For more interesting data, we insert some deviation in our numbers
   def deviate(duration: FiniteDuration):FiniteDuration = {

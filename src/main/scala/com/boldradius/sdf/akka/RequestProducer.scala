@@ -12,7 +12,7 @@ class RequestProducer(concurrentSessions:Int) extends Actor with ActorLogging {
   import context.dispatcher
 
   // Interval used to check for active sessions
-  val checkSessionInterval = 1000 milliseconds
+  val checkSessionInterval = 100 milliseconds
 
   // We begin by waiting for a Start signal to arrive
   def receive: Receive = stopped

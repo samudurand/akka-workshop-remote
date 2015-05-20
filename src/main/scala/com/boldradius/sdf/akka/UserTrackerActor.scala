@@ -23,6 +23,7 @@ class UserTrackerActor(statsActor: ActorRef) extends Actor with ActorLogging {
   }
 
   def closeSession() = {
+    log.debug(s"Terminating tracker, sending ${requests.length} requests")
     statsActor ! StatsDump(requests.toList)
     context.stop(self)
   }
