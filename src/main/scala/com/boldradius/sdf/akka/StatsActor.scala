@@ -2,6 +2,7 @@ package com.boldradius.sdf.akka
 
 import akka.actor.{Props, Actor, ActorLogging}
 import com.boldradius.sdf.akka.StatsActor.StatsDump
+import com.boldradius.sdf.akka.Supervisor.StatsTerminatedException
 import org.joda.time.DateTime
 
 import scala.collection.mutable
