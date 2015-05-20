@@ -1,15 +1,11 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.{Props, ActorLogging, Actor}
+import akka.actor.{ActorRef, Props, ActorLogging, Actor}
 
 import scala.collection.parallel.mutable
 import scala.collection.mutable.ListBuffer
 
-object UserTrackerActor {
-  def props = Props[UserTrackerActor]
-}
-
-class UserTrackerActor extends Actor with ActorLogging {
+class UserTrackerActor(statsActor: ActorRef) extends Actor with ActorLogging {
 
   private val requests = new ListBuffer[Request]
 
@@ -17,5 +13,8 @@ class UserTrackerActor extends Actor with ActorLogging {
     case request: Request => requests += request
     case _ => log.info("received")
   }
+}
 
+object UserTrackerActor {
+  def props(statsActor: ActorRef):Props = Props(new UserTrackerActor(statsActor))
 }

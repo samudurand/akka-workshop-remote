@@ -26,7 +26,7 @@ class Receiver(statsActor: ActorRef) extends Actor with ActorLogging {
   }
 
   private[akka] def createTracker(sessionId: Long): ActorRef = {
-    val newTracker = context.actorOf(UserTrackerActor.props)
+    val newTracker = context.actorOf(UserTrackerActor.props(statsActor))
     actorsBySession += (sessionId -> newTracker)
     newTracker
   }

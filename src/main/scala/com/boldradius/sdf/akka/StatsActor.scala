@@ -10,4 +10,6 @@ class StatsActor extends Actor with ActorLogging {
 
 object StatsActor {
   def props: Props = Props(new StatsActor)
+
+//  case class
 }
