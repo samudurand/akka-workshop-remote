@@ -10,7 +10,8 @@ object RequestSimulationExampleApp extends App {
   // First, we create an actor system, a producer and a consumer
   val system = ActorSystem("EventProducerExample")
   val producer = system.actorOf(RequestProducer.props(10), "producerActor")
-  val consumer = system.actorOf(Receiver.props, "dummyConsumer")
+  val statsActor = system.actorOf(StatsActor.props)
+  val consumer = system.actorOf(Receiver.props(statsActor), "dummyConsumer")
 
   // Tell the producer to start working and to send messages to the consumer
   producer ! Start(consumer)

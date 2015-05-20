@@ -1,16 +1,12 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.{ReceiveTimeout, Props, ActorLogging, Actor}
+import akka.actor._
 
 import scala.collection.parallel.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
-object UserTrackerActor {
-  def props = Props[UserTrackerActor]
-}
-
-class UserTrackerActor extends Actor with ActorLogging {
+class UserTrackerActor(statsActor: ActorRef) extends Actor with ActorLogging {
 
   private val requests = new ListBuffer[Request]
 
@@ -24,7 +20,11 @@ class UserTrackerActor extends Actor with ActorLogging {
   }
 
   def closeSession() = {
+    statsActor ! 
     context.stop(self)
   }
+}
 
+object UserTrackerActor {
+  def props(statsActor: ActorRef):Props = Props(new UserTrackerActor(statsActor))
 }
