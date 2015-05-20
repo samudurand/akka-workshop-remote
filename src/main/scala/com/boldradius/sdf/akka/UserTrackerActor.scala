@@ -32,7 +32,7 @@ class UserTrackerActor(statsActor: ActorRef) extends Actor with ActorLogging {
 
   def saveLastVisit() = {
     val currentTime = System.nanoTime()
-    val durationLastVisit = lastMessageTime - currentTime
+    val durationLastVisit = currentTime - lastMessageTime
     visits += visitFromRequest(durationLastVisit)
     lastMessageTime = currentTime
   }
@@ -49,7 +49,7 @@ class UserTrackerActor(statsActor: ActorRef) extends Actor with ActorLogging {
 
   def closeSession() = {
     log.debug(s"Terminating tracker, sending ${visits.length} visits")
-    saveLastVisit()
+    if (currentRequest != null) saveLastVisit()
     statsActor ! StatsDump(visits.toList)
     context.stop(self)
   }

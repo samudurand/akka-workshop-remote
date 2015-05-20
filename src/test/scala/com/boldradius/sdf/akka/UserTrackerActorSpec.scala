@@ -17,7 +17,7 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
       val probe = TestProbe()
       val userTrackerActor = actor(new UserTrackerActor(probe.ref))
       probe.watch(userTrackerActor)
-      probe.within(0.5 seconds, 1.1 seconds) {
+      probe.within(100 millis, 300 millis) {
         probe.expectMsg(StatsDump(List()))
         probe.expectTerminated(userTrackerActor)
       }
@@ -27,8 +27,11 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
       val userTrackerActor = actor(new UserTrackerActor(probe.ref))
       probe.watch(userTrackerActor)
 
-      val r1 = Visit(1, 1, "url1", "ref1", "b1", 1)
-      val r2 = Visit(2, 2, "url2", "ref2", "b2", 2)
+      val r1 = Request(1, 1, "url1", "ref1", "b1")
+      val r2 = Request(2, 2, "url2", "ref2", "b2")
+
+      val v1 = Visit(1, 1, "url1", "ref1", "b1", 1)
+      val v2 = Visit(2, 2, "url2", "ref2", "b2", 2)
 
       userTrackerActor ! r1
       Thread.sleep(100)
@@ -37,7 +40,7 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
       userTrackerActor ! r1
 
       probe.within(100 milliseconds, 300 milliseconds) {
-        probe.expectMsg(StatsDump(List(r1, r2, r1)))
+        probe.expectMsg(StatsDump(List(v1, v2, v1)))
         probe.expectTerminated(userTrackerActor)
       }
     }
