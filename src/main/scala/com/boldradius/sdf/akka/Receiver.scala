@@ -4,12 +4,8 @@ import akka.actor._
 
 import scala.collection.mutable
 
-object Receiver {
-  def props = Props[Receiver]
-}
-
 // Mr Dummy Consumer simply shouts to the log the messages it receives
-class Receiver extends Actor with ActorLogging {
+class Receiver(statsActor: ActorRef) extends Actor with ActorLogging {
 
   private val actorsBySession = mutable.HashMap.empty[Long, ActorRef]
 
@@ -35,3 +31,8 @@ class Receiver extends Actor with ActorLogging {
     newTracker
   }
 }
+
+object Receiver {
+  def props(statsActor: ActorRef): Props = Props(new Receiver(statsActor))
+}
+
