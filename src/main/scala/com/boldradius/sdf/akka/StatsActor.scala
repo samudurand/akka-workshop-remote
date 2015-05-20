@@ -1,8 +1,7 @@
 package com.boldradius.sdf.akka
 
-import akka.actor.{Props, Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, Props}
 import com.boldradius.sdf.akka.StatsActor.StatsDump
-import com.boldradius.sdf.akka.Supervisor.StatsTerminatedException
 import com.boldradius.sdf.akka.UserTrackerActor.Visit
 import org.joda.time.DateTime
 
@@ -10,19 +9,20 @@ import scala.collection.mutable
 
 class StatsActor extends Actor with ActorLogging {
 
+//  val durationDistribution = new mutable.HashMap[String, Long]() withDefaultValue 0
   val requestsPerBrowser = new mutable.HashMap[String, Int]() withDefaultValue 0
   val hitsPerMinute = new mutable.HashMap[Int, Int]() withDefaultValue 0
   val pageVisitDistribution = new mutable.HashMap[String, Int]() withDefaultValue 0
   val referrerDistribution = new mutable.HashMap[String, Int]() withDefaultValue 0
 
   override def receive: Receive = {
-    case StatsDump(requests) =>
-      log.info(s"Received ${requests.size} requests - updating stats")
-      requests.foreach(request => {
-        calculateRequestsPerBrowser(request.browser)
-        calculateHitsPerMinute(request.timestamp)
-        calculatePageVisitDistribution(request.url)
-        calculateReferrerDistribution(request.referrer)
+    case StatsDump(visits) =>
+      log.info(s"Received ${visits.size} requests - updating stats")
+      visits.foreach(visit => {
+        calculateRequestsPerBrowser(visit.browser)
+        calculateHitsPerMinute(visit.timestamp)
+        calculatePageVisitDistribution(visit.url)
+        calculateReferrerDistribution(visit.referrer)
       })
 
     case _ => log.info("Stat received!")
@@ -44,6 +44,11 @@ class StatsActor extends Actor with ActorLogging {
   private def totalVisits: Int = {
     pageVisitDistribution.foldLeft(0)(_ + _._2)
   }
+
+
+//  private def totalDurations: Int = {
+//    pageVisitDistribution.foldLeft(0)(_ + _._2)
+//  }
 
   def top3LandingPages(): Seq[String] = {
     val sorted = pageVisitDistribution.toSeq.sortWith(_._2 > _._2)
@@ -83,6 +88,13 @@ class StatsActor extends Actor with ActorLogging {
     pageVisitDistribution.update(url, newCount)
     log.info(s"Updated page count for url:[${url}] to [${newCount}]")
   }
+
+//  private[akka] def calculateDurationDistribution(url: String, duration: Long) = {
+//    durationDistribution.sum()
+//    val newCount = durationDistribution(url) + 1
+//    pageVisitDistribution.update(url, newCount)
+//    log.info(s"Updated page count for url:[${url}] to [${newCount}]")
+//  }
 
   private[akka] def calculateReferrerDistribution(referrer: String) = {
     val newCount = referrerDistribution(referrer) + 1
