@@ -1,6 +1,7 @@
 package com.boldradius.sdf.akka
 
 import akka.actor._
+import com.boldradius.sdf.akka.StatsActor.StatsDump
 
 import scala.collection.parallel.mutable
 import scala.collection.mutable.ListBuffer
@@ -20,7 +21,7 @@ class UserTrackerActor(statsActor: ActorRef) extends Actor with ActorLogging {
   }
 
   def closeSession() = {
-    statsActor ! 
+    statsActor ! StatsDump(requests.toList)
     context.stop(self)
   }
 }
