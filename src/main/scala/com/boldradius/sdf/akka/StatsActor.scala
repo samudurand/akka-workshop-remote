@@ -10,9 +10,25 @@ import scala.collection.mutable
 class StatsActor extends Actor with ActorLogging {
 
 //  val durationDistribution = new mutable.HashMap[String, Long]() withDefaultValue 0
+
+  /**
+   * Total for browser, keyed by browser
+   */
   val requestsPerBrowser = new mutable.HashMap[String, Int]() withDefaultValue 0
+
+  /**
+   * Totals for minute, keyed by minute of the day
+   */
   val hitsPerMinute = new mutable.HashMap[Int, Int]() withDefaultValue 0
+
+  /**
+   * Total page visits keyed by page
+   */
   val pageVisitDistribution = new mutable.HashMap[String, Int]() withDefaultValue 0
+
+  /**
+   * Total referrers, keyed by referrer
+   */
   val referrerDistribution = new mutable.HashMap[String, Int]() withDefaultValue 0
 
   override def receive: Receive = {
@@ -51,7 +67,7 @@ class StatsActor extends Actor with ActorLogging {
 //  }
 
   def top3LandingPages(): Seq[String] = {
-    val sorted = pageVisitDistribution.toSeq.sortWith(_._2 > _._2)
+    val sorted = pageVisitDistribution.toSeq.sortWith((url, url2) => url._2 > url2._2)
     sorted.slice(0, 3).map(_._1)
   }
 
