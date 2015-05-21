@@ -6,9 +6,9 @@ import scala.concurrent.duration._
 
 object RequestSimulationExampleApp extends App {
 
-  val system = ActorSystem("EventProducerExample")
+  val system = ActorSystem("RemoteChat")
 
-  val chatActor = system.actorOf(ChatActor.props)
+  val chatActor = system.actorOf(ChatActor.props, "chat")
 
   // Wait for the user to hit <enter>
   println("Hit <enter> to stop the simulation")
