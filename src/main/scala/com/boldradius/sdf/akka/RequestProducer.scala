@@ -3,6 +3,7 @@ package com.boldradius.sdf.akka
 import akka.actor._
 import RequestProducer._
 import scala.concurrent.duration._
+import scala.util.Random
 
 /**
  * Manages active sessions, and creates more as needed
@@ -13,6 +14,11 @@ class RequestProducer(concurrentSessions:Int) extends Actor with ActorLogging {
 
   // Interval used to check for active sessions
   val checkSessionInterval = 100 milliseconds
+
+  val config = context.system.settings.config
+  val dosModeOn = config.getBoolean("modes.dos")
+
+  val ramdomizer = Random
 
   // We begin by waiting for a Start signal to arrive
   def receive: Receive = stopped
@@ -46,8 +52,17 @@ class RequestProducer(concurrentSessions:Int) extends Actor with ActorLogging {
     log.debug(s"Checking active sessions - found $activeSessions for a max of $concurrentSessions concurrent sessions")
 
     if(activeSessions < concurrentSessions) {
-      log.debug("Creating a new session")
+      createSessionActor(target)
+    }
+  }
+
+  private def createSessionActor(target: ActorRef): Unit = {
+    log.debug("Creating a new session")
+    //if DOS mode on, generate a DOS session 1 time on 3
+    if (!dosModeOn || ramdomizer.nextInt(3) != 0) {
       context.actorOf(SessionActor.props(target))
+    } else {
+      context.actorOf(DOSActor.props(target))
     }
   }
 }
