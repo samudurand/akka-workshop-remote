@@ -18,17 +18,17 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
   "The tracker actor" should {
     "shutdown after 1s of inactivity" in {
       val probe = TestProbe()
-      val userTrackerActor = actor(new UserTrackerActor(probe.ref, mockActorProbe.ref))
-      probe.watch(userTrackerActor)
+      val shieldActor = actor(new ShieldActor(probe.ref, mockActorProbe.ref))
+      probe.watch(shieldActor)
       probe.within(100 millis, 300 millis) {
         probe.expectMsg(StatsDump(List()))
-        probe.expectTerminated(userTrackerActor)
+        probe.expectTerminated(shieldActor)
       }
     }
     "store all requests and send them when session closed" in {
       val probe = TestProbe()
-      val userTrackerActor = actor(new UserTrackerActor(probe.ref, mockActorProbe.ref))
-      probe.watch(userTrackerActor)
+      val shieldActor = actor(new ShieldActor(probe.ref, mockActorProbe.ref))
+      probe.watch(shieldActor)
 
       val r1 = Request(1, 1, "url1", "ref1", "b1")
       val r2 = Request(2, 2, "url2", "ref2", "b2")
@@ -36,11 +36,11 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
       val v1 = Visit(r1, 1)
       val v2 = Visit(r2, 2)
 
-      userTrackerActor ! r1
+      shieldActor ! r1
       Thread.sleep(100)
-      userTrackerActor ! r2
+      shieldActor ! r2
       Thread.sleep(100)
-      userTrackerActor ! r1
+      shieldActor ! r1
 
       probe.within(100 milliseconds, 300 milliseconds) {
         val dump = probe.expectMsgType[StatsDump]
@@ -48,36 +48,36 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
         dump.requests(0).request shouldBe r1
         dump.requests(1).request shouldBe r2
         dump.requests(2).request shouldBe r1
-        probe.expectTerminated(userTrackerActor)
+        probe.expectTerminated(shieldActor)
       }
     }
 
     "send a chat request after timeout on help page" in {
       val probe = TestProbe()
-      val userTrackerActor = actor(new UserTrackerActor(mockActorProbe.ref, probe.ref))
+      val shieldActor = actor(new ShieldActor(mockActorProbe.ref, probe.ref))
 
       val r1 = Request(1, 1, "/help", "ref1", "b1")
       val r2 = Request(1, 1, "/other", "ref1", "b1")
 
-      userTrackerActor ! r1
+      shieldActor ! r1
       Thread.sleep(200)
-      userTrackerActor ! r2
+      shieldActor ! r2
 
-      userTrackerActor ! r1
+      shieldActor ! r1
 
       probe.expectMsg(StartChat(1))
     }
 
     "not send a chat request if page help left soon enough" in {
       val probe = TestProbe()
-      val userTrackerActor = actor(new UserTrackerActor(mockActorProbe.ref, probe.ref))
+      val shieldActor = actor(new ShieldActor(mockActorProbe.ref, probe.ref))
 
       val r1 = Request(1, 1, "/help", "ref1", "b1")
       val r2 = Request(1, 1, "/other", "ref1", "b1")
 
-      userTrackerActor ! r1
+      shieldActor ! r1
       Thread.sleep(50)
-      userTrackerActor ! r2
+      shieldActor ! r2
 
       probe.expectNoMsg(500 millis)
 

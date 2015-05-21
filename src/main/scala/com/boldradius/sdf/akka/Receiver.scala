@@ -1,6 +1,7 @@
 package com.boldradius.sdf.akka
 
 import akka.actor._
+import com.boldradius.sdf.akka.ShieldActor.BannedRequest
 
 import scala.collection.mutable
 
@@ -13,6 +14,7 @@ class Receiver(statsActor: ActorRef, emailActor: ActorRef) extends Actor with Ac
     case request: Request =>
       val actor = getFromSessionOrCreate(request.sessionId)
       actor ! request
+    case BannedRequest(request) => log.info("Reject request from session {}", request.sessionId)
     case Terminated(tracker) => actorsBySession -=
       actorsBySession.find(_._2 == tracker).get._1
   }
@@ -27,7 +29,7 @@ class Receiver(statsActor: ActorRef, emailActor: ActorRef) extends Actor with Ac
   }
 
   private[akka] def createTracker(sessionId: Long): ActorRef = {
-    val newTracker = context.actorOf(UserTrackerActor.props(statsActor, emailActor))
+    val newTracker = context.actorOf(ShieldActor.props(statsActor, emailActor))
     actorsBySession += (sessionId -> newTracker)
     context.watch(newTracker)
     newTracker

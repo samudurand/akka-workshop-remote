@@ -49,7 +49,7 @@ class UserTrackerActor(statsActor: ActorRef, chatActor: ActorRef) extends Actor 
     log.debug(s"Terminating tracker, sending ${visits.length} visits")
     if (currentRequest != null) saveLastVisit()
     statsActor ! StatsDump(visits.toList)
-    context.stop(self)
+    context.stop(context.parent)
   }
 
   def checkHelpNeeded(request: Request): Unit = {

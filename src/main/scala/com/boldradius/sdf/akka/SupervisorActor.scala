@@ -3,9 +3,9 @@ package com.boldradius.sdf.akka
 import akka.actor.SupervisorStrategy.{Restart, Stop}
 import akka.actor._
 import com.boldradius.sdf.akka.RequestProducer.Start
-import com.boldradius.sdf.akka.Supervisor.{StopProducing, StartProducing, StatsTerminatedException}
+import com.boldradius.sdf.akka.SupervisorActor.{StopProducing, StartProducing, StatsTerminatedException}
 
-class Supervisor extends Actor with ActorLogging {
+class SupervisorActor extends Actor with ActorLogging {
 
   val producer = context.actorOf(RequestProducer.props(10), "producerActor")
   val statsActor = createStatsActor()
@@ -37,9 +37,9 @@ class Supervisor extends Actor with ActorLogging {
 
 }
 
-object Supervisor {
+object SupervisorActor {
 
-  def props = Props[Supervisor]
+  def props = Props[SupervisorActor]
 
   case object StartProducing
   case object StopProducing
