@@ -12,5 +12,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % "2.3.6",
   "ch.qos.logback" % "logback-classic" % "1.1.2",
   "joda-time" % "joda-time" % "2.7",
-  "com.typesafe.play" %% "play-ws" % "2.3.8"
+  "com.typesafe.play" %% "play-ws" % "2.3.8",
+  "com.typesafe.akka" %% "akka-remote" % "2.3.9"
 )
