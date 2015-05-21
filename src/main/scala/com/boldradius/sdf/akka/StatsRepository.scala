@@ -64,9 +64,6 @@ class StatsRepository(log: LoggingAdapter, config: Config) {
 
 }
 
-/**
- * Created by user on 21/05/15.
- */
 case class StatsModel(
                        requestsPerBrowser: Map[String, Int],
                        hitsPerMinute: Map[String, Int], //int key

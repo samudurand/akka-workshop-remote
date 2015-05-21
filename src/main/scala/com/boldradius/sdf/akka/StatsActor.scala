@@ -9,6 +9,7 @@ import scala.concurrent.duration._
 import scala.collection.mutable
 
 class StatsActor extends Actor with ActorLogging {
+
   import context.dispatcher
 
   var stats = new Statistics()
@@ -159,7 +160,7 @@ class Statistics(
   /**
    * Count and averageTime per Url
    */
-  val visitTimeDistribution = vtd withDefaultValue VisitAv(0,0)
+  val visitTimeDistribution = vtd withDefaultValue VisitAv(0, 0)
 }
 
 case class VisitAv(count: Int, avTime: Long)
@@ -168,6 +169,7 @@ object StatsActor {
   def props: Props = Props(new StatsActor)
 
   case class StatsDump(requests: List[Visit])
+
   case object SaveStats
 
 }
