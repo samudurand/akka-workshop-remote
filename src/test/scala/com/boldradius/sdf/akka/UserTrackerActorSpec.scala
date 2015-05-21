@@ -2,6 +2,7 @@ package com.boldradius.sdf.akka
 
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
+import com.boldradius.sdf.akka.ChatActor.StartChat
 import com.boldradius.sdf.akka.StatsActor.StatsDump
 import com.boldradius.sdf.akka.UserTrackerActor.Visit
 import org.scalatest.{Matchers, WordSpec, FunSuite}
@@ -50,6 +51,38 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
         probe.expectTerminated(userTrackerActor)
       }
     }
+
+    "send a chat request after timeout on help page" in {
+      val probe = TestProbe()
+      val userTrackerActor = actor(new UserTrackerActor(mockActorProbe.ref, probe.ref))
+
+      val r1 = Request(1, 1, "/help", "ref1", "b1")
+      val r2 = Request(1, 1, "/other", "ref1", "b1")
+
+      userTrackerActor ! r1
+      Thread.sleep(200)
+      userTrackerActor ! r2
+
+      userTrackerActor ! r1
+
+      probe.expectMsg(StartChat(1))
+    }
+
+    "not send a chat request if page help left soon enough" in {
+      val probe = TestProbe()
+      val userTrackerActor = actor(new UserTrackerActor(mockActorProbe.ref, probe.ref))
+
+      val r1 = Request(1, 1, "/help", "ref1", "b1")
+      val r2 = Request(1, 1, "/other", "ref1", "b1")
+
+      userTrackerActor ! r1
+      Thread.sleep(50)
+      userTrackerActor ! r2
+
+      probe.expectNoMsg(500 millis)
+
+    }
+
   }
 
 }

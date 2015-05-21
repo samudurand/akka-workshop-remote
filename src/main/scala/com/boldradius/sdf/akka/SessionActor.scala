@@ -4,6 +4,8 @@ import akka.actor._
 import System.{currentTimeMillis => now}
 import SessionActor._
 
+import scala.concurrent.duration.FiniteDuration
+
 // Wraps around a session and emits requests to the target actor
 class SessionActor(target: ActorRef) extends Actor with ActorLogging {
 
@@ -27,8 +29,12 @@ class SessionActor(target: ActorRef) extends Actor with ActorLogging {
       target ! request
 
       // Schedule a Click message to myself after some time visiting this page
-      val pageDuration = Session.randomPageTime(request.url)
+      val pageDuration = generatePageTime(request)
       context.system.scheduler.scheduleOnce(pageDuration, self, Click)
+  }
+
+  protected def generatePageTime(request: Request): FiniteDuration = {
+    Session.randomPageTime(request.url)
   }
 }
 
