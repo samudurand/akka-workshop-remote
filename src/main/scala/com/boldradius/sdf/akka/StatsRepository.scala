@@ -1,12 +1,13 @@
 package com.boldradius.sdf.akka
 
-import java.io.{PrintWriter, File}
+import java.io.{IOException, PrintWriter, File}
 
 import akka.event.LoggingAdapter
 import com.typesafe.config.Config
 import play.api.libs.json.Json
 
 import scala.io.Source
+import scala.util.{Success, Failure, Try}
 
 class StatsRepository(log: LoggingAdapter, config: Config) {
 
@@ -27,12 +28,18 @@ class StatsRepository(log: LoggingAdapter, config: Config) {
     pw.close
   }
 
-  def loadStatistics(): Statistics = {
+  def loadStatistics(): Try[Statistics] = {
     log.info("Loading stats from file")
-    val string = Source.fromFile(new File(statsFile)).mkString
+    try {
+      val string = Source.fromFile(new File(statsFile)).mkString
 
-    val stats = Json.parse(string).as[StatsModel]
-    statsModelToStatistics(stats)
+      val stats = Json.parse(string).as[StatsModel]
+      Success(statsModelToStatistics(stats))
+    } catch {
+      case e: IOException =>
+        log.info(s"Failed to load statistics: ${e.getMessage}")
+        Failure(e)
+    }
   }
 
   /**

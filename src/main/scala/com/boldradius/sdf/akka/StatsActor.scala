@@ -23,7 +23,8 @@ class StatsActor extends Actor with ActorLogging {
   val scheduler = context.system.scheduler.schedule(saveInterval, saveInterval, self, SaveStats)
 
   override def preStart(): Unit = {
-    stats = statsRepository.loadStatistics()
+
+    statsRepository.loadStatistics().foreach(loadedStatistics => stats = loadedStatistics)
   }
 
   override def receive: Receive = {
