@@ -12,10 +12,12 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
 
   implicit val system = ActorSystem()
 
+  val mockActorProbe = TestProbe()
+
   "The tracker actor" should {
     "shutdown after 1s of inactivity" in {
       val probe = TestProbe()
-      val userTrackerActor = actor(new UserTrackerActor(probe.ref))
+      val userTrackerActor = actor(new UserTrackerActor(probe.ref, mockActorProbe.ref))
       probe.watch(userTrackerActor)
       probe.within(100 millis, 300 millis) {
         probe.expectMsg(StatsDump(List()))
@@ -24,14 +26,14 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
     }
     "store all requests and send them when session closed" in {
       val probe = TestProbe()
-      val userTrackerActor = actor(new UserTrackerActor(probe.ref))
+      val userTrackerActor = actor(new UserTrackerActor(probe.ref, mockActorProbe.ref))
       probe.watch(userTrackerActor)
 
       val r1 = Request(1, 1, "url1", "ref1", "b1")
       val r2 = Request(2, 2, "url2", "ref2", "b2")
 
-      val v1 = Visit(1, 1, "url1", "ref1", "b1", 1)
-      val v2 = Visit(2, 2, "url2", "ref2", "b2", 2)
+      val v1 = Visit(r1, 1)
+      val v2 = Visit(r2, 2)
 
       userTrackerActor ! r1
       Thread.sleep(100)
@@ -40,7 +42,11 @@ class UserTrackerActorSpec extends WordSpec with Matchers {
       userTrackerActor ! r1
 
       probe.within(100 milliseconds, 300 milliseconds) {
-        probe.expectMsg(StatsDump(List(v1, v2, v1)))
+        val dump = probe.expectMsgType[StatsDump]
+        dump.requests.length shouldBe 3
+        dump.requests(0).request shouldBe r1
+        dump.requests(1).request shouldBe r2
+        dump.requests(2).request shouldBe r1
         probe.expectTerminated(userTrackerActor)
       }
     }

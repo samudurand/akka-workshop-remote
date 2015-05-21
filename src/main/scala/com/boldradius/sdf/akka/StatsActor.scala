@@ -19,10 +19,10 @@ class StatsActor extends Actor with ActorLogging {
     case StatsDump(visits) =>
       log.info(s"Received ${visits.size} requests - updating stats")
       visits.foreach(visit => {
-        calculateRequestsPerBrowser(visit.browser)
-        calculateHitsPerMinute(visit.timestamp)
-        calculatePageVisitDistribution(visit.url)
-        calculateReferrerDistribution(visit.referrer)
+        calculateRequestsPerBrowser(visit.request.browser)
+        calculateHitsPerMinute(visit.request.timestamp)
+        calculatePageVisitDistribution(visit.request.url)
+        calculateReferrerDistribution(visit.request.referrer)
       })
 
     case _ => log.info("Stat received!")

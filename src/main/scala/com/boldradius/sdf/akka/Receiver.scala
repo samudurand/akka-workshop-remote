@@ -5,7 +5,7 @@ import akka.actor._
 import scala.collection.mutable
 
 // Mr Dummy Consumer simply shouts to the log the messages it receives
-class Receiver(statsActor: ActorRef) extends Actor with ActorLogging {
+class Receiver(statsActor: ActorRef, emailActor: ActorRef) extends Actor with ActorLogging {
 
   private val actorsBySession = mutable.HashMap.empty[Long, ActorRef]
 
@@ -13,8 +13,8 @@ class Receiver(statsActor: ActorRef) extends Actor with ActorLogging {
     case request: Request =>
       val actor = getFromSessionOrCreate(request.sessionId)
       actor ! request
-
-      log.debug(s"Received the following message: $request")
+    case Terminated(tracker) => actorsBySession -=
+      actorsBySession.find(_._2 == tracker).get._1
   }
 
   def getFromSessionOrCreate(sessionId: Long): ActorRef = {
@@ -27,13 +27,14 @@ class Receiver(statsActor: ActorRef) extends Actor with ActorLogging {
   }
 
   private[akka] def createTracker(sessionId: Long): ActorRef = {
-    val newTracker = context.actorOf(UserTrackerActor.props(statsActor))
+    val newTracker = context.actorOf(UserTrackerActor.props(statsActor, emailActor))
     actorsBySession += (sessionId -> newTracker)
+    context.watch(newTracker)
     newTracker
   }
 }
 
 object Receiver {
-  def props(statsActor: ActorRef): Props = Props(new Receiver(statsActor))
+  def props(statsActor: ActorRef, emailActor: ActorRef): Props = Props(new Receiver(statsActor, emailActor))
 }
 

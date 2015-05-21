@@ -29,6 +29,7 @@ class SupervisorSpec extends WordSpec with Matchers  {
 
       mockStatsActor ! "empty message"
       probe.expectNoMsg()
+
       mockStatsActor ! "empty message"
       probe.expectNoMsg()
       mockStatsActor ! "empty message"

@@ -9,7 +9,8 @@ class Supervisor extends Actor with ActorLogging {
 
   val producer = context.actorOf(RequestProducer.props(10), "producerActor")
   val statsActor = createStatsActor()
-  val consumer = context.actorOf(Receiver.props(statsActor), "dummyConsumer")
+  val chatActor = createChatActor()
+  val consumer = context.actorOf(Receiver.props(statsActor, chatActor), "dummyConsumer")
 
   def receive: Receive = {
     case StartProducing =>
@@ -22,15 +23,16 @@ class Supervisor extends Actor with ActorLogging {
   }
 
   override val supervisorStrategy = {
-    val decider: SupervisorStrategy.Decider = {
-      case StatsTerminatedException => Restart
-    }
-    OneForOneStrategy(maxNrOfRetries = 1)(decider orElse super.supervisorStrategy.decider)
+    OneForOneStrategy(maxNrOfRetries = 2)(super.supervisorStrategy.decider)
   }
 
   //Deferred to a method for supervising strategy testing
   private[akka] def createStatsActor() = {
     context.actorOf(StatsActor.props)
+  }
+  
+  private[akka] def createChatActor() = {
+    context.actorOf(ChatActor.props)
   }
 
 }
